@@ -1,0 +1,10 @@
+{
+    "id": "memory-spacetimedb",
+    "name": "Memory (SpacetimeDB)",
+    "version": "1.0.0",
+    "description": "Ultimate Memory powered by SpacetimeDB 2.0",
+    "kind": "memory",
+    "author": "OpenClaw Contributor",
+    "license": "MIT",
+    "icon": "database"
+}
