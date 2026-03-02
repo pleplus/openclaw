@@ -1,10 +1,51 @@
 {
-    "id": "memory-spacetimedb",
-    "name": "Memory (SpacetimeDB)",
-    "version": "1.0.0",
-    "description": "Ultimate Memory powered by SpacetimeDB 2.0",
-    "kind": "memory",
-    "author": "OpenClaw Contributor",
-    "license": "MIT",
-    "icon": "database"
+  "id": "memory-spacetimedb",
+  "name": "Memory (SpacetimeDB)",
+  "version": "1.0.0",
+  "description": "Ultimate Memory powered by SpacetimeDB 2.0",
+  "kind": "memory",
+  "author": "OpenClaw Contributor",
+  "license": "MIT",
+  "icon": "database",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["domain", "embedding"],
+    "properties": {
+      "domain": {
+        "type": "string"
+      },
+      "host": {
+        "type": "string"
+      },
+      "token": {
+        "type": "string"
+      },
+      "autoRecall": {
+        "type": "boolean"
+      },
+      "autoCapture": {
+        "type": "boolean"
+      },
+      "embedding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["apiKey"],
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
 }

@@ -1,64 +1,115 @@
-import { ReducerContext, Table, SpacetimeType, Primary, Vector, Reducer } from "@clockworklabs/spacetimedb-sdk";
+import { schema, table, t, type ReducerCtx, type InferSchema } from "spacetimedb/server";
 
-/**
- * SpacetimeDB Module for OpenClaw "Ultimate Memory"
- */
+const spacetimedb = schema({
+  sessions: table(
+    { public: true },
+    {
+      id: t.string().primaryKey(),
+      updatedAt: t.u64(),
+      metadataJson: t.string(),
+    },
+  ),
+  messages: table(
+    { public: true },
+    {
+      id: t.string().primaryKey(),
+      sessionId: t.string(),
+      role: t.string(),
+      content: t.string(),
+      timestamp: t.u64(),
+    },
+  ),
+  memories: table(
+    { public: true },
+    {
+      id: t.string().primaryKey(),
+      text: t.string(),
+      embedding: t.array(t.f32()),
+      importance: t.f32(),
+      category: t.string(),
+      createdAt: t.u64(),
+    },
+  ),
+});
 
-@SpacetimeType
-export type MemoryCategory = "preference" | "decision" | "fact" | "entity" | "other";
+export type S = InferSchema<typeof spacetimedb>;
 
-@Table("public")
-export class Session {
-    @Primary
-    id: string;
-    updatedAt: number;
-    metadataJson: string; // Serialized SessionEntry metadata
-}
+export const add_message = spacetimedb.reducer(
+  {
+    id: t.string(),
+    sessionId: t.string(),
+    role: t.string(),
+    content: t.string(),
+  },
+  (
+    ctx: ReducerCtx<S>,
+    {
+      id,
+      sessionId,
+      role,
+      content,
+    }: { id: string; sessionId: string; role: string; content: string },
+  ) => {
+    ctx.db.messages.insert({
+      id,
+      sessionId,
+      role,
+      content,
+      timestamp: BigInt(Date.now()),
+    });
 
-@Table("public")
-export class Message {
-    @Primary
-    id: string;
-    sessionId: string;
-    role: string;
-    content: string;
-    timestamp: number;
-}
-
-@Table("public")
-export class Memory {
-    @Primary
-    id: string;
-    text: string;
-    @Vector(1536) // Default OpenAI embedding size
-    embedding: number[];
-    importance: number;
-    category: MemoryCategory;
-    createdAt: number;
-}
-
-@Reducer
-export function addMessage(ctx: ReducerContext, sessionId: string, role: string, content: string) {
-    const id = ctx.sender.toString() + "_" + Date.now();
-    Message.insert({ id, sessionId, role, content, timestamp: Date.now() });
-    
-    // Update session timestamp
-    const session = Session.findById(sessionId);
+    const session = ctx.db.sessions.id.find(sessionId);
     if (session) {
-        session.updatedAt = Date.now();
-        Session.update(session);
+      ctx.db.sessions.id.update({
+        ...session,
+        updatedAt: BigInt(Date.now()),
+      });
     } else {
-        Session.insert({ id: sessionId, updatedAt: Date.now(), metadataJson: "{}" });
+      ctx.db.sessions.insert({
+        id: sessionId,
+        updatedAt: BigInt(Date.now()),
+        metadataJson: "{}",
+      });
     }
-}
+  },
+);
 
-@Reducer
-export function storeMemory(ctx: ReducerContext, text: string, embedding: number[], importance: number, category: MemoryCategory) {
-    const id = ctx.sender.toString() + "_" + Date.now();
-    Memory.insert({ id, text, embedding, importance, category, createdAt: Date.now() });
-}
+export const store_memory = spacetimedb.reducer(
+  {
+    id: t.string(),
+    text: t.string(),
+    embedding: t.array(t.f32()),
+    importance: t.f32(),
+    category: t.string(),
+  },
+  (
+    ctx: ReducerCtx<S>,
+    {
+      id,
+      text,
+      embedding,
+      importance,
+      category,
+    }: { id: string; text: string; embedding: number[]; importance: number; category: string },
+  ) => {
+    ctx.db.memories.insert({
+      id,
+      text,
+      embedding,
+      importance,
+      category,
+      createdAt: BigInt(Date.now()),
+    });
+  },
+);
 
-@Reducer
-export function deleteMemory(ctx: ReducerContext, id: string) {
-    Memory.deleteById(id);
-}
+export const delete_memory = spacetimedb.reducer(
+  {
+    id: t.string(),
+  },
+  (ctx: ReducerCtx<S>, { id }: { id: string }) => {
+    ctx.db.memories.id.delete(id);
+  },
+);
+
+export default spacetimedb;

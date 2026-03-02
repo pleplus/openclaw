@@ -1,11 +1,15 @@
 {
-    "name": "@openclaw/extension-memory-spacetimedb",
-    "version": "1.0.0",
-    "private": true,
-    "type": "module",
-    "main": "index.js",
-    "dependencies": {
-        "@sinclair/typebox": "latest",
-        "@clockworklabs/spacetimedb-sdk": "latest"
-    }
+  "name": "@openclaw/extension-memory-spacetimedb",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.48",
+    "openai": "^4.0.0",
+    "spacetimedb": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }

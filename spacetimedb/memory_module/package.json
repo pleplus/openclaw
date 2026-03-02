@@ -1,0 +1,12 @@
+{
+  "name": "memory-claw",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "spacetimedb": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}
